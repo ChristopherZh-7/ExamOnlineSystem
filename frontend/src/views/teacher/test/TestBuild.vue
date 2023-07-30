@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>{{ status }}测验信息</h2>
+    <h2>{{ status }}考核信息</h2>
     <el-form
       :model="testForm"
       :rules="testFormRules"
@@ -11,15 +11,15 @@
     >
       <el-row>
         <el-col :span="8">
-          <el-form-item label="测验标题" prop="testName">
+          <el-form-item label="考核标题" prop="testName">
             <el-input
               v-model="testForm.testName"
-              placeholder="请填写测验标题"
+              placeholder="请填写考核标题"
             ></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="16">
-          <el-form-item label="测验日期" prop="date">
+          <el-form-item label="考核日期" prop="date">
             <el-date-picker
               v-model="testForm.date"
               type="datetimerange"
@@ -34,7 +34,7 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-form-item label="测验简介" prop="description">
+        <el-form-item label="考核简介" prop="description">
           <el-input
             type="textarea"
             :autosize="{ minRows: 2 }"
@@ -47,10 +47,10 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="所属科目" prop="subjectId">
+          <el-form-item label="所属评估周期" prop="subjectId">
             <el-select
               filterable
-              placeholder="请选择科目"
+              placeholder="请选择评估周期"
               @change="changeSubjectId"
               v-model="testForm.subjectId"
             >
@@ -463,7 +463,7 @@ export default {
           },
         ],
         subjectId: [
-          { required: true, message: "请选择所属科目", trigger: "blur" },
+          { required: true, message: "请选择评估周期", trigger: "blur" },
         ],
         generateWay: [
           { required: true, message: "请选择组卷方式", trigger: "blur" },

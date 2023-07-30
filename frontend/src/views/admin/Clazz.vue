@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="margin-bottom: 10px">
-      <h2 style="display: inline">班级信息</h2>
+      <h2 style="display: inline">评估类型信息</h2>
       <div style="float: right">
         <el-button
           @click="
@@ -16,7 +16,7 @@
         >
       </div>
       <el-dialog
-        :title="status + '班级信息'"
+        :title="status + '评估类型信息'"
         v-model="dialogFormVisible"
         width="600px"
       >
@@ -27,10 +27,10 @@
           label-width="200px"
           label-position="right"
         >
-          <el-form-item label="专业" prop="majorId">
+          <el-form-item label="考核类型" prop="majorId">
             <el-select
               filterable
-              placeholder="请选择专业"
+              placeholder="请选择考核类型"
               @change="valueToMajorId"
               v-model="clazzForm.majorId"
             >
@@ -43,7 +43,7 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="班级" prop="clazzName">
+          <el-form-item label="评估类型" prop="clazzName">
             <el-input v-model="clazzForm.clazzName"></el-input>
           </el-form-item>
         </el-form>
@@ -71,15 +71,15 @@
       <el-table-column type="index" label="序号" width="60"> </el-table-column>
       <el-table-column
         prop="majorName"
-        label="专业"
+        label="考核类型"
         :filters="majorFilterData"
         :filter-method="majorFilter"
       >
       </el-table-column>
-      <el-table-column prop="clazzName" label="班级"> </el-table-column>
+      <el-table-column prop="clazzName" label="评估类型"> </el-table-column>
       <el-table-column width="300">
         <template #header>
-          <el-input v-model="search" placeholder="输入班级进行搜索" />
+          <el-input v-model="search" placeholder="输入评估类型进行搜索" />
         </template>
         <template #default="scope">
           <el-button
@@ -99,13 +99,13 @@
               dialogTableTitle = scope.row.clazzName;
               loadStudentByClazzId(scope.row.clazzId);
             "
-            >查看所有学生</el-button
+            >查看所属员工</el-button
           >
         </template>
       </el-table-column>
     </el-table>
     <el-dialog
-      :title="dialogTableTitle + '班级所有学生信息'"
+      :title="dialogTableTitle + '部门所有员工信息'"
       v-model="dialogTableVisible"
       width="1000px"
       top="70px"
@@ -146,10 +146,10 @@ export default {
       },
       formRules: {
         clazzName: [
-          { required: true, message: "请填写班级名称", trigger: "blur" },
+          { required: true, message: "请填写员工名称", trigger: "blur" },
         ],
         majorId: [
-          { required: true, message: "请填写专业名称", trigger: "change" },
+          { required: true, message: "请填写考核类型名称", trigger: "change" },
         ],
       },
 

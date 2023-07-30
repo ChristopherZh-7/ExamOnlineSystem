@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="margin-bottom: 10px">
-      <h2 style="display: inline">专业信息</h2>
+      <h2 style="display: inline">考核类型信息</h2>
       <div style="float: right">
         <el-button
           @click="
@@ -16,7 +16,7 @@
         >
       </div>
       <el-dialog
-        :title="status + '专业信息'"
+        :title="status + '考核累心信息'"
         v-model="dialogFormVisible"
         width="600px"
       >
@@ -27,7 +27,7 @@
           label-width="200px"
           label-position="right"
         >
-          <el-form-item label="专业" prop="majorName">
+          <el-form-item label="考核类型" prop="majorName">
             <el-input v-model="majorForm.majorName"></el-input>
           </el-form-item>
         </el-form>
@@ -53,10 +53,10 @@
     >
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column type="index" label="序号" width="60"> </el-table-column>
-      <el-table-column prop="majorName" label="专业"> </el-table-column>
+      <el-table-column prop="majorName" label=考核类型> </el-table-column>
       <el-table-column width="450">
         <template #header>
-          <el-input v-model="search" placeholder="输入专业名称进行搜索" />
+          <el-input v-model="search" placeholder="输入考核类型名称进行搜索" />
         </template>
         <template #default="scope">
           <el-button
@@ -78,7 +78,7 @@
               loadClazzByMajorId(scope.row.majorId);
             "
           >
-            查看所属班级
+            查看评估类型
           </el-button>
           <el-button
             type="primary"
@@ -89,13 +89,13 @@
               loadTeacherByMajorId(scope.row.majorId);
             "
           >
-            查看所有教师
+            查看所属管理
           </el-button>
         </template>
       </el-table-column>
     </el-table>
     <el-dialog
-      :title="dialogTableTitle + '专业' + dialogTableSubTitle"
+      :title="dialogTableTitle + '考核类型类型' + dialogTableSubTitle"
       v-model="dialogTableVisible"
       width="1000px"
       top="70px"
@@ -145,7 +145,7 @@ export default {
       },
       formRules: {
         majorName: [
-          { required: true, message: "请填写专业名称", trigger: "blur" },
+          { required: true, message: "请填写考核类型名称", trigger: "blur" },
         ],
       },
 

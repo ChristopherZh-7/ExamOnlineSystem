@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="margin-bottom: 10px">
-      <h2>测验记录</h2>
+      <h2>考核记录</h2>
     </div>
     <el-table
       :data="
@@ -15,7 +15,7 @@
       height="540px"
     >
       <el-table-column type="index" label="序号" width="60"> </el-table-column>
-      <el-table-column prop="testName" label="测验标题">
+      <el-table-column prop="testName" label="考核标题">
         <template #default="scope">
           <el-popover trigger="hover" placement="right">
             <p style="width: 150px">简介: {{ scope.row.description }}</p>
@@ -27,7 +27,7 @@
       </el-table-column>
       <el-table-column
         prop="subjectName"
-        label="所属科目"
+        label="评估周期"
         :filters="subjectFilterData"
         :filter-method="subjectFilter"
       >
@@ -39,7 +39,7 @@
           {{ scope.row.questionTotal }}
         </template>
       </el-table-column>
-      <el-table-column label="已完成次数/测验总次数">
+      <el-table-column label="已完成次数/考核总次数">
         <template #default="scope">
           {{ scope.row.completeTime }}
           /
@@ -48,7 +48,7 @@
       </el-table-column>
       <el-table-column width="300">
         <template #header>
-          <el-input v-model="search" placeholder="输入测验标题进行搜索" />
+          <el-input v-model="search" placeholder="输入考核标题进行搜索" />
         </template>
         <template #default="scope">
           <el-button

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="margin-bottom: 10px">
-      <h2 style="display: inline">科目信息</h2>
+      <h2 style="display: inline">考核信息</h2>
       <div style="float: right">
         <el-button
           @click="
@@ -27,13 +27,13 @@
           label-width="200px"
           label-position="right"
         >
-          <el-form-item label="科目名称" prop="subjectName">
+          <el-form-item label="评估周期" prop="subjectName">
             <el-input v-model="subjectForm.subjectName"></el-input>
           </el-form-item>
-          <el-form-item label="授课班级" prop="clazzId">
+          <el-form-item label="考核类型" prop="clazzId">
             <el-select
               filterable
-              placeholder="请选择授课班级"
+              placeholder="请选择考核类型"
               @change="valueToClazzId"
               v-model="subjectForm.clazzId"
             >
@@ -69,10 +69,10 @@
     >
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column type="index" label="序号" width="60"> </el-table-column>
-      <el-table-column prop="subjectName" label="科目名称"> </el-table-column>
+      <el-table-column prop="subjectName" label="评估周期"> </el-table-column>
       <el-table-column
         prop="clazzName"
-        label="授课班级"
+        label="考核类型"
         :filters="clazzFilterData"
         :filter-method="clazzFilter"
       >
@@ -135,7 +135,7 @@ export default {
           { required: true, message: "请填写科目名称", trigger: "blur" },
         ],
         clazzId: [
-          { required: true, message: "请选择授课班级", trigger: "change" },
+          { required: true, message: "请选择考核类型", trigger: "change" },
         ],
       },
 

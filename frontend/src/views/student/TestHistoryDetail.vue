@@ -10,7 +10,7 @@
         <template #header>
           <el-select
             filterable
-            placeholder="请选择要查看的测验记录"
+            placeholder="请选择要查看的考核记录"
             @change="valueToChangeHistory"
             v-model="historyNumber"
           >
@@ -205,7 +205,7 @@ export default {
             for (let i = 1; i <= res.completeTime; i++) {
               this.completeList.push("第" + i + "次测验记录");
               this.testHistoryInfoTable = [
-                ["所属科目", res.subjectName],
+                ["评估周期", res.subjectName],
                 [
                   "测验开始时间",
                   res.beginDate

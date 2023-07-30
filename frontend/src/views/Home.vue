@@ -64,10 +64,10 @@ export default {
           this.loadAdminData();
           break;
         case "ROLE_TEACHER":
-          this.loadTeacherData(this.user.username + "教师");
+          this.loadTeacherData(this.user.username + "");
           break;
         case "ROLE_STUDENT":
-          this.loadStudentData(this.user.username + "同学");
+          this.loadStudentData(this.user.username + "");
           break;
       }
     });

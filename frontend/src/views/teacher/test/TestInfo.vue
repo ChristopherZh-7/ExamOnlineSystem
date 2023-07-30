@@ -35,7 +35,7 @@
       </el-table-column>
       <el-table-column
         prop="subjectName"
-        label="所属科目"
+        label="评估周期"
         :filters="subjectFilterData"
         :filter-method="subjectFilter"
         width="150"
