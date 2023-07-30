@@ -128,20 +128,15 @@
             </span>
           </el-form-item>
           <el-form-item label="关联知识点" prop="knowledgeId">
-            <el-select
-              filterable
-              placeholder="请选择关联知识点"
-              @change="valueToKnowledgeId"
+            <el-cascader
               v-model="questionForm.knowledgeId"
-            >
-              <el-option
-                v-for="knowledge in knowledgeList"
-                :key="knowledge.chapterId"
-                :label="knowledge.content"
-                :value="knowledge.chapterId"
-              >
-              </el-option>
-            </el-select>
+              :options="knowledgeList"
+              :props="cascaderProps"
+              placeholder="请选择关联知识点"
+              clearable
+              filterable
+              @change="handleKnowledgeChange"
+            ></el-cascader>
           </el-form-item>
           <el-form-item label="难度系数" prop="questionDifficulty">
             <el-input-number
@@ -332,11 +327,25 @@ export default {
       pageno: 1,
       size: 10,
       totalItems: 0,
+      cascaderProps: {
+        value: 'value',
+        label: 'label',
+        children: 'children',
+        checkStrictly: true,
+        emitPath: false
+      },
     };
   },
   created() {
     this.userId = this.$storage.getStorageSync("user").id;
     this.loadData();
+  },
+  mounted() {
+    this.$nextTick(() => {
+      if (this.questionForm.subjectId) {
+        this.loadKnowledgeBySubjectId(this.questionForm.subjectId);
+      }
+    });
   },
   methods: {
     // 初始化页面
@@ -419,7 +428,8 @@ export default {
     },
     valueToSubjectId(val) {
       this.questionForm.subjectId = val;
-      this.loadKnowledgeBySubjectId(this.questionForm.subjectId);
+      this.questionForm.knowledgeId = null; // 重置知识点
+      this.loadKnowledgeBySubjectId(val);
     },
 
     loadQuestionType() {
@@ -465,7 +475,8 @@ export default {
         .then((response) => {
           let res = dealSelect(response.data);
           if (res) {
-            this.knowledgeList = res;
+            this.knowledgeList = this.processKnowledgeList(res);
+            console.log('处理后的知识点列表:', this.knowledgeList); // 检查数据
           }
         });
     },
@@ -603,11 +614,31 @@ export default {
         this.$message.info("请选择要删除的信息");
       }
     },
+    processKnowledgeList(list) {
+      return list.map(item => {
+        const processedItem = {
+          value: item.chapterId,
+          label: item.content,
+          isKnowledge: item.isKnowledge
+        };
+        if (item.children && item.children.length > 0) {
+          processedItem.children = this.processKnowledgeList(item.children);
+        }
+        return processedItem;
+      });
+    },
+    handleKnowledgeChange(value) {
+      this.questionForm.knowledgeId = value;
+      console.log('选中的知识点ID:', value); // 检查选中的值
+    },
   },
 };
 </script>
 <style scoped>
 .el-input {
   width: 250px;
+}
+.el-cascader {
+  width: 100%;
 }
 </style>
