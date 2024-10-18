@@ -25,7 +25,7 @@ public class KnowledgeFrameServiceImpl extends ServiceImpl<KnowledgeFrameMapper,
     public List<KnowledgeFrame> loadKnowledgeBySubjectId(Integer subjectId) {
         QueryWrapper<KnowledgeFrame> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("subject_id", subjectId);
-        queryWrapper.eq("is_knowledge", 1);
+//        queryWrapper.eq("is_knowledge", 1);
         return knowledgeFrameMapper.selectList(queryWrapper);
     }
 
