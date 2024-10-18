@@ -28,13 +28,12 @@
           label-position="right"
         >
           <el-form-item label="角色">
-            <!-- eslint-disable-next-line -->
             <template #default="scope">
               <div v-if="!isAdd">
                 <el-tag
                   :type="user.description == '学生' ? 'success' : 'danger'"
                 >
-                  {{ user.description }}
+                  {{ mapRoleDisplay(user.description) }}
                 </el-tag>
               </div>
               <el-select
@@ -47,7 +46,7 @@
                 <el-option
                   v-for="roleData in roleList"
                   :key="roleData.roleId"
-                  :label="roleData.description"
+                  :label="mapRoleDisplay(roleData.description)"
                   :value="roleData.roleId"
                 >
                 </el-option>
@@ -71,8 +70,7 @@
           <el-form-item label="密码" prop="password">
             <el-input v-model="user.password" type="password"></el-input>
           </el-form-item>
-          <el-form-item label="专业班级">
-            <!-- eslint-disable-next-line -->
+          <el-form-item label="考核/评估类型">
             <template #default="scope">
               <span
                 :style="{
@@ -99,9 +97,9 @@
               <el-cascader
                 @change="valueToCascade"
                 v-model="majorclazzName"
-                placeholder="请选择专业班级"
+                placeholder="请选择考核/评估类型班级"
                 :options="majorClazzList"
-                filterable1
+                filterable
                 :show-all-levels="false"
                 :props="{ expandTrigger: 'hover' }"
                 v-if="user.roleId == '3'"
@@ -147,7 +145,7 @@
                 ? 'warning'
                 : 'danger'
             "
-            >{{ scope.row.description }}</el-tag
+            >{{ mapRoleDisplay(scope.row.description) }}</el-tag
           >
         </template>
       </el-table-column>
@@ -190,6 +188,7 @@
 import userToken from "@/services/auth-header";
 import { dealSelect } from "@/services/response";
 import User from "@/services/user.js";
+
 export default {
   data() {
     return {
@@ -215,6 +214,11 @@ export default {
       pageno: 1,
       size: 10,
       totalItems: 0,
+      roleDisplayMap: {
+        '管理员': '管理员',
+        '教师': '管理',
+        '学生': '员工'
+      },
     };
   },
   created() {
@@ -274,7 +278,7 @@ export default {
             this.roleFilterData = [];
             res.forEach((item) => {
               this.roleFilterData.push({
-                text: item.description,
+                text: this.mapRoleDisplay(item.description),
                 value: item.roleId,
               });
             });
@@ -336,17 +340,16 @@ export default {
           let res = dealSelect(response.data);
           if (res) {
             this.user = res;
-            this.majorclazzName = [res.majorId, res.clazzId];
-            this.clazzId = res.clazzId;
-            this.majorId = res.majorId;
             this.oldPassword = res.password;
-            switch (res.roleId) {
-              case 2:
-                this.loadMajorList();
-                break;
-              case 3:
-                this.loadMajorClazzCascader();
-                break;
+            
+            // 根据角色设置专业班级信息
+            if (res.roleId == 2) { // 教师
+              this.majorId = res.majorId;
+              this.loadMajorList();
+            } else if (res.roleId == 3) { // 学生
+              this.majorclazzName = [res.majorId, res.clazzId];
+              this.clazzId = res.clazzId;
+              this.loadMajorClazzCascader();
             }
           }
         });
@@ -424,6 +427,9 @@ export default {
       } else {
         this.$message.info("请选择要删除的信息");
       }
+    },
+    mapRoleDisplay(role) {
+      return this.roleDisplayMap[role] || role;
     },
   },
 };

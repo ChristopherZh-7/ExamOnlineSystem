@@ -16,7 +16,7 @@
         >
       </div>
       <el-dialog
-        :title="status + '科目信息'"
+        :title="status + '评估周期信息'"
         v-model="dialogFormVisible"
         width="600px"
       >
@@ -79,7 +79,7 @@
       </el-table-column>
       <el-table-column width="300">
         <template #header>
-          <el-input v-model="search" placeholder="输入科目名进行搜索" />
+          <el-input v-model="search" placeholder="输入评估周期进行搜索" />
         </template>
         <template #default="scope">
           <el-button

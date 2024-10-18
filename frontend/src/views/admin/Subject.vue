@@ -34,7 +34,7 @@
       >
     </div>
     <el-dialog
-        :title="status + '科目信息'"
+        :title="status + '评估周期'"
         v-model="dialogFormVisible"
         width="600px"
     >
@@ -48,10 +48,10 @@
         <el-form-item label="考核名称" prop="subjectName">
           <el-input v-model="subjectForm.subjectName"></el-input>
         </el-form-item>
-        <el-form-item label="授课教师" prop="teacherId">
+        <el-form-item label="管理姓名" prop="teacherId">
           <el-select
               filterable
-              placeholder="请选择授课教师"
+              placeholder="请选择管理姓名"
               @change="valueToUserId"
               v-model="subjectForm.teacherId"
           >
@@ -104,7 +104,7 @@
       <el-table-column type="selection" width="40"> </el-table-column>
       <el-table-column type="index" label="序号" width="60"> </el-table-column>
       <el-table-column prop="subjectName" label="评估周期"> </el-table-column>
-      <el-table-column prop="teacherName" label="授课教师"> </el-table-column>
+      <el-table-column prop="teacherName" label="管理姓名"> </el-table-column>
       <el-table-column
           prop="clazzName"
           label="考核类型"
@@ -116,7 +116,7 @@
         <template #header>
           <el-input
               v-model="search"
-              placeholder="输入科目名或教师姓名进行搜索"
+              placeholder="输入评估周期或管理姓名进行搜索"
           />
         </template>
         <template #default="scope">
@@ -165,10 +165,10 @@ export default {
       },
       formRules: {
         subjectName: [
-          { required: true, message: "请填写科目", trigger: "blur" },
+          { required: true, message: "请填写评估周期", trigger: "blur" },
         ],
         teacherId: [
-          { required: true, message: "请选择授课教师", trigger: "change" },
+          { required: true, message: "请选择管理姓名", trigger: "change" },
         ],
         clazzId: [
           { required: true, message: "请选择考核类型", trigger: "change" },
