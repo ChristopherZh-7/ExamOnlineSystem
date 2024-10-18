@@ -1,97 +1,93 @@
 <template>
-  <div>
-    <div style="margin-bottom: 10px">
-      <h2>考核信息</h2>
-      <div style="margin-top: 10px">
-        <el-select
-            filterable
-            placeholder="请选择考核类型"
-            @change="valueToMajorId"
-            v-model="majorForm.majorName"
-            style="width: 100%"
-        >
-          <el-option
-              v-for="major in majorList"
-              :key="major.majorId"
-              :label="major.majorName"
-              :value="major.majorId"
-          >
-          </el-option>
-        </el-select>
-      </div>
-      <div style="float: right">
-        <el-button
-            @click="
-            clearFormFields();
-            this.status = '新增';
-            dialogFormVisible = true;
-          "
-            :disabled="majorForm.majorName == ''"
-        >新增</el-button
-        >
-        <el-button
-            type="danger"
-            @click="del(this.multiSelection)"
-            :disabled="majorForm.majorName == ''"
-        >删除</el-button
-        >
-      </div>
-      <el-dialog
-          :title="status + '科目信息'"
-          v-model="dialogFormVisible"
-          width="600px"
+  <div class="subject-container">
+    <h2 class="page-title">考核信息</h2>
+    <div class="control-row">
+      <el-select
+          filterable
+          placeholder="请选择考核类型"
+          @change="valueToMajorId"
+          v-model="majorForm.majorName"
+          class="major-select"
       >
-        <el-form
-            :model="subjectForm"
-            :rules="formRules"
-            ref="subjectForm"
-            label-width="200px"
-            label-position="right"
+        <el-option
+            v-for="major in majorList"
+            :key="major.majorId"
+            :label="major.majorName"
+            :value="major.majorId"
         >
-          <el-form-item label="考核名称" prop="subjectName">
-            <el-input v-model="subjectForm.subjectName"></el-input>
-          </el-form-item>
-          <el-form-item label="授课教师" prop="teacherId">
-            <el-select
-                filterable
-                placeholder="请选择授课教师"
-                @change="valueToUserId"
-                v-model="subjectForm.teacherId"
-            >
-              <el-option
-                  v-for="teacher in teacherList"
-                  :key="teacher.userId"
-                  :label="teacher.username"
-                  :value="teacher.userId"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="考核类型" prop="clazzId">
-            <el-select
-                filterable
-                placeholder="请选择考核类型"
-                @change="valueToClazzId"
-                v-model="subjectForm.clazzId"
-            >
-              <el-option
-                  v-for="clazz in clazzList"
-                  :key="clazz.clazzId"
-                  :label="clazz.clazzName"
-                  :value="clazz.clazzId"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="save()">确 定</el-button>
-          </span>
-        </template>
-      </el-dialog>
+        </el-option>
+      </el-select>
+      <el-button
+          @click="
+          clearFormFields();
+          this.status = '新增';
+          dialogFormVisible = true;
+        "
+          :disabled="majorForm.majorName == ''"
+      >新增</el-button
+      >
+      <el-button
+          type="danger"
+          @click="del(this.multiSelection)"
+          :disabled="majorForm.majorName == ''"
+      >删除</el-button
+      >
     </div>
+    <el-dialog
+        :title="status + '科目信息'"
+        v-model="dialogFormVisible"
+        width="600px"
+    >
+      <el-form
+          :model="subjectForm"
+          :rules="formRules"
+          ref="subjectForm"
+          label-width="200px"
+          label-position="right"
+      >
+        <el-form-item label="考核名称" prop="subjectName">
+          <el-input v-model="subjectForm.subjectName"></el-input>
+        </el-form-item>
+        <el-form-item label="授课教师" prop="teacherId">
+          <el-select
+              filterable
+              placeholder="请选择授课教师"
+              @change="valueToUserId"
+              v-model="subjectForm.teacherId"
+          >
+            <el-option
+                v-for="teacher in teacherList"
+                :key="teacher.userId"
+                :label="teacher.username"
+                :value="teacher.userId"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="考核类型" prop="clazzId">
+          <el-select
+              filterable
+              placeholder="请选择考核类型"
+              @change="valueToClazzId"
+              v-model="subjectForm.clazzId"
+          >
+            <el-option
+                v-for="clazz in clazzList"
+                :key="clazz.clazzId"
+                :label="clazz.clazzName"
+                :value="clazz.clazzId"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="save()">确 定</el-button>
+        </span>
+      </template>
+    </el-dialog>
     <el-table
         :data="
         tableData.filter(
@@ -387,6 +383,30 @@ export default {
 };
 </script>
 <style scoped>
+.subject-container {
+  padding-top: 0;  /* 移除顶部内边距 */
+}
+
+.page-title {
+  margin-top: 0px;  /* 使用负边距将标题往上移动 */
+  margin-bottom: 20px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.major-select {
+  flex-grow: 1;
+  margin-right: 20px;
+}
+
+.el-button {
+  margin-left: 10px;
+}
+
 .el-input {
   width: 250px;
 }
