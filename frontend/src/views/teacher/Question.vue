@@ -65,7 +65,7 @@
                 :autosize="{ minRows: 2 }"
                 v-model="questionForm.questionTitle"
                 style="width: 250px"
-                maxlength="50"
+                :maxlength="questionForm.typeId == '5' ? 1000 : 50"
                 show-word-limit
             ></el-input>
           </el-form-item>
@@ -91,9 +91,9 @@
               label="正确答案"
               prop="correct"
               :rules="{
-              required: questionForm.typeId != '3',
-              message: '请选择正确答案',
-              trigger: 'change',
+              required: questionForm.typeId != '3' && questionForm.typeId != '5',
+              message: '请输入正确答案',
+              trigger: 'blur',
             }"
               v-if="questionForm.typeId != undefined"
           >
@@ -123,8 +123,13 @@
                   @click="changeJudge(false)"
               ></el-button>
             </el-button-group>
-            <span style="color: red" v-if="questionForm.typeId == '3'">
-              简答题默认无标准答案，并用相似度对比
+            <el-input
+                v-model="questionForm.correct"
+                placeholder="请输入正确的flag"
+                v-if="questionForm.typeId == '4'"
+            ></el-input>
+            <span style="color: red" v-if="questionForm.typeId == '3' || questionForm.typeId == '5'">
+              {{ questionForm.typeId == '3' ? '简答题默认无标准答案，并用相似度对比' : '代码审计题无标准答案' }}
             </span>
           </el-form-item>
           <el-form-item label="关联知识点" prop="knowledgeId">
@@ -220,19 +225,31 @@
       <el-table-column prop="answer" label="正确答案" width="85">
         <template #default="scope">
           <el-popover
-              trigger="hover"
-              placement="left"
-              v-if="scope.row.typeId == '1'"
+            trigger="hover"
+            placement="left"
+            v-if="scope.row.typeId == '1' && scope.row.answer.length > 0"
           >
             <p v-for="option in scope.row.answer" :key="option.answerId">
               <span>选项{{ option.answerSign }}: {{ option.content }}</span>
             </p>
             <template #reference>
-              <el-tag>{{ scope.row.correct }}</el-tag>
+              <el-tag>{{ scope.row.correct || '未设置' }}</el-tag>
             </template>
           </el-popover>
-          <el-tag v-if="scope.row.typeId == '2'">
+          <el-tag v-else-if="scope.row.typeId == '2' && scope.row.answer.length > 0">
             {{ scope.row.answer[0].answerSign == "1" ? "√" : "×" }}
+          </el-tag>
+          <el-tag v-else-if="scope.row.typeId == '4' && scope.row.answer.length > 0">
+            {{ scope.row.answer[0].answerSign }}
+          </el-tag>
+          <el-tag v-else-if="scope.row.typeId == '3'">
+            简答题
+          </el-tag>
+          <el-tag v-else-if="scope.row.typeId == '5'">
+            代码审计题
+          </el-tag>
+          <el-tag v-else>
+            未设置
           </el-tag>
         </template>
       </el-table-column>
@@ -643,3 +660,4 @@ export default {
   width: 100%;
 }
 </style>
+
