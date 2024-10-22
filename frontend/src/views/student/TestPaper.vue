@@ -36,11 +36,14 @@
       <el-card
         shadow="hover"
         style="margin-bottom: 10px"
-        v-for="(type, index) in filteredQuestionList"
+        v-for="(type, index) in testForm.questionList"
         :key="index"
       >
         <template #header>
-          <span style="font-weight: bold">{{ type.name }}</span>
+          <div class="question-type-header">
+            <span :class="`question-type-icon ${getQuestionTypeClass(index)}`"></span>
+            <span style="font-weight: bold">{{ type.name }}</span>
+          </div>
         </template>
         <el-row
           v-for="(list, i) in type.list"
@@ -56,12 +59,13 @@
               <el-button
                 circle
                 size="large"
-                :class="{
-                  'index-btn-border': isCurrentQuestion(index, i, j),
-                  'index-btn-style': isAnswered(index, i, j),
-                }"
+                :class="[
+                  `question-btn-${getQuestionTypeClass(index)}`,
+                  { 'index-btn-border': isCurrentQuestion(index, i, j),
+                    'index-btn-style': isAnswered(index, i, j) }
+                ]"
                 style="
-                  cursor: auto;
+                  cursor: pointer;
                   margin-bottom: 5px;
                   font-weight: bold;
                   font-size: 16px;
@@ -137,6 +141,7 @@
           :number="sequence"
           :questionId="currentQuestion.questionId"
           :title="currentQuestion.questionTitle"
+          :content="currentQuestion.questionContent"
           @returnAnswer="getReply"
         ></code-audit-question>
       </div>
@@ -213,7 +218,7 @@ export default {
         testId: "",
         testName: "",
         questionTotal: 0,
-        questionList: [], // 确保这里初始化为空数组
+        questionList: [],
       },
 
       sequence: 1, // 全局
@@ -223,6 +228,8 @@ export default {
       currentQuestion: null,
       allQuestions: [],
       debugInfo: '', // 添加这行用于调试
+      questionTypeStartNumbers: [1, 1, 1, 1, 1], // 每种题型的起始题号
+      globalQuestionNumbers: [], // 新增：用于存储每个题目的全局序号
     };
   },
   created() {
@@ -278,40 +285,39 @@ export default {
               { name: "提交flag题", length: 0, list: [] },
               { name: "代码审计题", length: 0, list: [] },
             ];
-            let quesList = [[], [], [], [], []]; // 扩展到5个数组
-            let quesNum = [0, 0, 0, 0, 0]; // 扩展到5个计数器
-
+            let quesList = [[], [], [], [], []];
+            let quesNum = [0, 0, 0, 0, 0];
+            let globalIndex = 1;
+            
             res.forEach((item, index) => {
               if (item.typeId >= 1 && item.typeId <= 5) {
                 quesList[item.typeId - 1].push(item);
                 quesNum[item.typeId - 1]++;
+                
+                this.globalQuestionNumbers.push(globalIndex);
+                
                 if (quesNum[item.typeId - 1] % this.CARD_COL_NUMBER == 0) {
                   this.testForm.questionList[item.typeId - 1].list.push(
                     quesList[item.typeId - 1]
                   );
                   quesList[item.typeId - 1] = [];
                 }
+                
+                globalIndex++;
               } else {
                 console.error('Invalid typeId:', item.typeId);
               }
-
-              if (index + 1 == this.testForm.questionTotal) {
-                for (let i = 0; i < this.testForm.questionList.length; i++) {
-                  if (quesList[i].length > 0) {
-                    this.testForm.questionList[i].list.push(quesList[i]);
-                  }
-                  this.testForm.questionList[i].length = quesNum[i];
-                }
-              }
             });
+            
+            for (let i = 0; i < this.testForm.questionList.length; i++) {
+              if (quesList[i].length > 0) {
+                this.testForm.questionList[i].list.push(quesList[i]);
+              }
+              this.testForm.questionList[i].length = quesNum[i];
+            }
           } else {
             console.error('Invalid or empty response data');
-            this.testForm.questionList = []; // 确保在错误情况下也设置为空数组
           }
-        })
-        .catch(error => {
-          console.error('Error loading test paper:', error);
-          this.testForm.questionList = []; // 确保在错误情况下也设置为空数组
         });
     },
 
@@ -357,7 +363,7 @@ export default {
           .catch(() => {
             // 点击提交后会先then()再catch()，设置isCommit防止提交后计时仍继续
             if (!isCommit) {
-              // 计时继续
+              // 计继续
               this.countDownKey = new Date();
               this.timekeep = true;
             }
@@ -400,7 +406,7 @@ export default {
       this.currentQuestion = this.allQuestions[this.sequence - 1];
     },
     isCurrentQuestion(typeIndex, rowIndex, colIndex) {
-      return this.sequence === this.getQuestionNumber(typeIndex, rowIndex, colIndex);
+      return this.sequence === this.getGlobalQuestionNumber(typeIndex, rowIndex, colIndex);
     },
 
     isAnswered(typeIndex, rowIndex, colIndex) {
@@ -409,24 +415,29 @@ export default {
     },
 
     getQuestionNumber(typeIndex, rowIndex, colIndex) {
-      let number = 1;
+      return rowIndex * this.CARD_COL_NUMBER + colIndex + 1;
+    },
+
+    getGlobalQuestionNumber(typeIndex, rowIndex, colIndex) {
+      let questionCount = 0;
       for (let i = 0; i < typeIndex; i++) {
-        number += this.testForm.questionList[i].length;
+        questionCount += this.testForm.questionList[i].length;
       }
-      number += rowIndex * this.CARD_COL_NUMBER + colIndex;
-      return number;
+      questionCount += rowIndex * this.CARD_COL_NUMBER + colIndex;
+      return this.globalQuestionNumbers[questionCount];
     },
 
     jumpToQuestion(typeIndex, rowIndex, colIndex) {
-      const questionNumber = this.getQuestionNumber(typeIndex, rowIndex, colIndex);
-      this.jumpTo(questionNumber);
+      const globalQuestionNumber = this.getGlobalQuestionNumber(typeIndex, rowIndex, colIndex);
+      this.sequence = globalQuestionNumber;
+      this.updateCurrentQuestion();
+      this.questionRefreshKey = new Date();
     },
-  },
-  computed: {
-    filteredQuestionList() {
-      // 添加防护检查
-      return (this.testForm.questionList || []).filter(type => type && type.length > 0);
-    }
+
+    getQuestionTypeClass(typeIndex) {
+      const types = ['choice', 'judge', 'short', 'flag', 'audit'];
+      return types[typeIndex] || 'choice';
+    },
   },
 };
 </script>
@@ -470,5 +481,73 @@ export default {
   justify-content: center;
   align-items: center;
 }
+
+.question-btn-choice {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.question-btn-judge {
+  background-color: #fff7e6;
+  color: #fa8c16;
+}
+
+.question-btn-short {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+.question-btn-flag {
+  background-color: #fff1f0;
+  color: #f5222d;
+}
+
+.question-btn-audit {
+  background-color: #f9f0ff;
+  color: #722ed1;
+}
+
+/* 当题目被选中或已回答时的样式 */
+.index-btn-style {
+  color: #fff !important;
+}
+
+.index-btn-border {
+  border: 2px solid currentColor !important;
+}
+
+.question-type-header {
+  display: flex;
+  align-items: center;
+}
+
+.question-type-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.question-type-icon.choice { background-color: #1890ff; }
+.question-type-icon.judge { background-color: #fa8c16; }
+.question-type-icon.short { background-color: #52c41a; }
+.question-type-icon.flag { background-color: #f5222d; }
+.question-type-icon.audit { background-color: #722ed1; }
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
