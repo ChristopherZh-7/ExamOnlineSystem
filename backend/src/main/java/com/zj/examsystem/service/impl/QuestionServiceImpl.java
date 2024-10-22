@@ -395,7 +395,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             question.setCorrect(null);
         }
         int result = questionMapper.insert(question);
-        if (3 != question.getTypeId() && result == 1) {
+        if (result == 1) {
             switch (question.getTypeId()) {
                 case 1: // choice
                     String correct = answers[0];
@@ -408,9 +408,16 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 case 2: // judge
                     Answer answer = new Answer(Boolean.parseBoolean(answers[0]) ? "1" : "0", 1, question.getQuestionId());
                     return answerMapper.insert(answer) != 0;
+                case 3: // short answer
+                    return true; // 简答题不需要保存标准答案
+                case 4: // flag
+                    Answer flagAnswer = new Answer(answers[0], 1, question.getQuestionId());
+                    return answerMapper.insert(flagAnswer) != 0;
+                case 5: // code audit
+                    return true; // 代码审计题不需要保存标准答案
+                default:
+                    return false;
             }
-        } else {
-            return 3 == question.getTypeId() && result == 1;
         }
         return false;
     }
