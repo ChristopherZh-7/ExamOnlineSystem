@@ -164,11 +164,11 @@ export default {
     },
 
     logOut() {
-      this.$axios.post("/user/logout", {
-        headers: { Authorization: userToken() },
-      });
       this.$storage.removeStorageSync("user");
-      this.$router.replace("/");
+      this.$message.success("登出成功");
+      this.$router.push("/").then(() => {
+        window.location.reload();
+      });
     },
   },
 };

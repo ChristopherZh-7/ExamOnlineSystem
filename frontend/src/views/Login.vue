@@ -99,14 +99,23 @@ export default {
           })
           .then((response) => {
             if (response.data.token) {
-              // 将该登录用户的令牌移入store
               this.$storage.setStorageSync("user", response.data, 10800000);
               this.$router.push("/home");
+            } else {
+              this.$message.error(response.data.message || "登录失败，请重试");
             }
           })
-          .catch((response) => {
-            console.log(response);
-            this.$message.error("存在错误，请检查！");
+          .catch((error) => {
+            console.error("登录错误:", error);
+            if (error.response) {
+              if (error.response.status === 500) {
+                this.$message.error("服务器内部错误，请联系管理员");
+              } else {
+                this.$message.error(error.response.data.message || "登录失败，请重试");
+              }
+            } else {
+              this.$message.error("网络错误，请检查您的网络连接");
+            }
           });
       }
     },

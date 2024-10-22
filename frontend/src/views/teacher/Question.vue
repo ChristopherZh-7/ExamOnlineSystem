@@ -3,14 +3,7 @@
     <div style="margin-bottom: 10px">
       <h2 style="display: inline">题目信息</h2>
       <div style="float: right">
-        <el-button
-            @click="
-            clearFormFields();
-            this.status = '新增';
-            dialogFormVisible = true;
-          "
-        >新增</el-button
-        >
+        <el-button @click="handleAddNew">新增</el-button>
         <el-button type="danger" @click="del(this.multiSelection)"
         >删除</el-button
         >
@@ -21,9 +14,9 @@
           width="600px"
       >
         <el-form
+            ref="questionForm"
             :model="questionForm"
             :rules="formRules"
-            ref="questionForm"
             label-width="200px"
             label-position="right"
         >
@@ -65,7 +58,7 @@
                 :autosize="{ minRows: 2 }"
                 v-model="questionForm.questionTitle"
                 style="width: 250px"
-                :maxlength="questionForm.typeId == '5' ? 1000 : 50"
+                :maxlength="questionForm.typeId == '5' ? 10000 : 50"
                 show-word-limit
             ></el-input>
           </el-form-item>
@@ -372,21 +365,27 @@ export default {
       this.loadQuestionType();
     },
     clearFormFields() {
-      this.questionForm = {};
-      this.questionForm.answer = [
-        {
-          answerId: "",
-          answerSign: "A",
-          content: "",
-          isCorrect: 0,
-        },
-      ];
-      this.$nextTick(() => {
-        this.$refs.questionForm.clearValidate();
-      });
+      this.questionForm = {
+        questionId: "",
+        questionTitle: "",
+        subjectId: "",
+        subjectName: "",
+        typeId: "",
+        typeName: "",
+        answer: [
+          {
+            answerId: "",
+            answerSign: "A",
+            content: "",
+            isCorrect: 0,
+          },
+        ],
+        correct: "",
+        knowledgeId: "",
+        questionDifficulty: 0.5,
+      };
       this.isTrue = "";
       this.isFalse = "";
-      this.questionForm.questionDifficulty = 0.5;
     },
     number2Letter(num) {
       return String.fromCharCode("A".charCodeAt() + num);
@@ -647,6 +646,16 @@ export default {
     handleKnowledgeChange(value) {
       this.questionForm.knowledgeId = value;
       console.log('选中的知识点ID:', value); // 检查选中的值
+    },
+    handleAddNew() {
+      this.clearFormFields();
+      this.status = '新增';
+      this.dialogFormVisible = true;
+      this.$nextTick(() => {
+        if (this.$refs.questionForm) {
+          this.$refs.questionForm.clearValidate();
+        }
+      });
     },
   },
 };
