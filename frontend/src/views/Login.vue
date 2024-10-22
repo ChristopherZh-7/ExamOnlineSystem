@@ -19,7 +19,7 @@
                 size="large"
                 :type="isTch"
                 @click="changeIdentity(2)"
-                >教师</el-button
+                >管理</el-button
               >
             </div>
             <div>
@@ -29,7 +29,7 @@
                 size="large"
                 :type="isStu"
                 @click="changeIdentity(3)"
-                >学生</el-button
+                >员工</el-button
               >
             </div>
           </div>

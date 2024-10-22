@@ -30,7 +30,7 @@
           >
             <template #title>
               <el-icon><grid /></el-icon>
-              专业管理
+              考核类型管理
             </template>
           </el-menu-item>
           <el-menu-item
@@ -41,7 +41,7 @@
           >
             <template #title>
               <el-icon><expand /></el-icon>
-              班级管理
+              考核部门管理
             </template>
           </el-menu-item>
           <el-menu-item
@@ -63,7 +63,7 @@
           >
             <template #title>
               <el-icon><help-filled /></el-icon>
-              科目管理
+              评估周期
             </template>
           </el-menu-item>
           <el-menu-item
@@ -87,7 +87,7 @@
           >
             <template #title>
               <el-icon><help-filled /></el-icon>
-              管理科目信息
+              管理考核信息
             </template>
           </el-menu-item>
           <el-menu-item
@@ -135,7 +135,7 @@
           >
             <template #title>
               <el-icon><promotion /></el-icon>
-              测验
+              考核
             </template>
           </el-menu-item>
           <el-menu-item
@@ -146,7 +146,7 @@
           >
             <template #title>
               <el-icon><list /></el-icon>
-              测验记录
+              考核记录
             </template>
           </el-menu-item>
         </el-menu>

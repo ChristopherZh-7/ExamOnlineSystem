@@ -24,7 +24,7 @@
                   type="text"
                   @click="toTestPaper(testForm.testId)"
                   :disabled="Date.parse(testForm.endDate) < new Date()"
-                  >开始测验</el-button
+                  >开始考核</el-button
                 >
               </div>
             </template>
@@ -33,7 +33,7 @@
                 <span>简介：{{ testForm.description }}</span>
                 <br />
                 <span>
-                  所属科目：
+                  评估周期：
                   <el-tag>{{ testForm.subjectName }}</el-tag>
                 </span>
                 <br />
@@ -46,11 +46,11 @@
                   }}</span
                 >
                 <br />
-                <span>测验时长：{{ testForm.testDuration }} 分钟</span>
+                <span>考核时长：{{ testForm.testDuration }} 分钟</span>
                 <br />
-                <span>测验次数：{{ testForm.testTime }} 次</span>
+                <span>考核次数：{{ testForm.testTime }} 次</span>
                 <br />
-                <span>测验题数：{{ testForm.questionTotal }} 道</span>
+                <span>考核题数：{{ testForm.questionTotal }} 道</span>
               </el-scrollbar>
             </div>
           </el-card>

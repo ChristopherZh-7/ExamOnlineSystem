@@ -370,7 +370,7 @@ export default {
           color: ["#38d39f"],
           title: {
             text: "本次测验客观题答对人数统计",
-            subtext: "统计数据为所有学生所有的测验记录",
+            subtext: "统计数据为所有学生所有的考核记录",
             left: "center",
             padding: 10,
             textStyle: {

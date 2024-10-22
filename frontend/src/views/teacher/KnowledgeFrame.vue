@@ -6,16 +6,16 @@
         {{ subjectForm.subjectName }}的知识点框架
       </h2>
       <el-button type="primary" style="float: right" @click="addNewParent()"
-        >新建第 {{ nextChapter }} 章</el-button
+      >新建第 {{ nextChapter }} 章</el-button
       >
     </div>
     <el-scrollbar :height="mainHeight">
       <el-tree
-        :data="treeData"
-        node-key="chapterId"
-        default-expand-all
-        #default="scope"
-        :expand-on-click-node="false"
+          :data="treeData"
+          node-key="chapterId"
+          default-expand-all
+          #default="scope"
+          :expand-on-click-node="false"
       >
         <span class="custom-tree-node">
           <span>
@@ -25,28 +25,28 @@
 
           <span>
             <el-button
-              v-if="!scope.data.isKnowledge"
-              type="success"
-              icon="circle-plus-filled"
-              circle
-              @click="() => append(scope.data)"
+                v-if="!scope.data.isKnowledge"
+                type="success"
+                icon="circle-plus-filled"
+                circle
+                @click="() => append(scope.data)"
             >
             </el-button>
             <el-button
-              type="primary"
-              icon="edit"
-              circle
-              @click="
+                type="primary"
+                icon="edit"
+                circle
+                @click="
                 clearFormFields();
                 dialogFormVisible = true;
                 loadInfo(scope.data);
               "
             ></el-button>
             <el-button
-              type="danger"
-              icon="delete-filled"
-              circle
-              @click="del(scope.node, scope.data)"
+                type="danger"
+                icon="delete-filled"
+                circle
+                @click="del(scope.node, scope.data)"
             >
             </el-button>
           </span>
@@ -54,16 +54,16 @@
       </el-tree>
       <el-dialog title="修改节点信息" v-model="dialogFormVisible" width="600px">
         <el-form
-          :model="chapterForm"
-          :rules="formRules"
-          ref="chapterForm"
-          label-width="200px"
-          label-position="right"
+            :model="chapterForm"
+            :rules="formRules"
+            ref="chapterForm"
+            label-width="200px"
+            label-position="right"
         >
           <el-form-item label="节点名称" prop="content">
             <el-input
-              style="width: 250px"
-              v-model="chapterForm.content"
+                style="width: 250px"
+                v-model="chapterForm.content"
             ></el-input>
           </el-form-item>
           <!-- <el-form-item label="是否是知识点" prop="isKnowledge">
@@ -123,18 +123,18 @@ export default {
   created() {
     // windowHeight - headerHeight - header.margin (20px * 2) - title.height - title.margin (0.83em * 2)
     this.mainHeight =
-      document.documentElement.clientHeight -
-      this.$storage.getStorageSync("headerHeight") -
-      40 -
-      37 -
-      13.28 * 2 +
-      "px";
+        document.documentElement.clientHeight -
+        this.$storage.getStorageSync("headerHeight") -
+        40 -
+        37 -
+        13.28 * 2 +
+        "px";
     this.subjectForm.subjectId = this.$route.params.subjectId;
     this.loadSubjectInfo(this.$route.params.subjectId);
     this.loadTreeDataBySubjectId(this.$route.params.subjectId).then(
-      (response) => {
-        this.nextChapter = this.getNextChapter();
-      }
+        (response) => {
+          this.nextChapter = this.getNextChapter();
+        }
     );
   },
   methods: {
@@ -147,6 +147,9 @@ export default {
       // this.$router.push("/teacher/subjectInfo");
     },
     getNextChapter() {
+      if (this.treeData.length === 0) {
+        return 1; // 如果 treeData 为空，返回 1 作为第一章
+      }
       let label = this.treeData[this.treeData.length - 1].label;
       return parseInt(label.replace(/[^0-9]/gi, "")) + 1;
     },
@@ -154,8 +157,8 @@ export default {
       data.forEach((elem) => {
         this.treeFlatData.push(elem);
         elem.children && elem.children.length > 0
-          ? this.getTreeFlatData(elem.children)
-          : "";
+            ? this.getTreeFlatData(elem.children)
+            : "";
       });
     },
     clearFormFields() {
@@ -167,34 +170,35 @@ export default {
 
     loadSubjectInfo(id) {
       this.$axios
-        .get("/subject/findById", {
-          headers: { Authorization: userToken() },
-          params: { subjectId: id },
-        })
-        .then((response) => {
-          let res = dealSelect(response.data);
-          if (res) {
-            this.subjectForm = res;
-          }
-        });
+          .get("/subject/findById", {
+            headers: { Authorization: userToken() },
+            params: { subjectId: id },
+          })
+          .then((response) => {
+            let res = dealSelect(response.data);
+            if (res) {
+              this.subjectForm = res;
+            }
+          });
     },
     loadTreeDataBySubjectId(id) {
       return this.$axios
-        .get("/knowledgeFrame/loadKnowledgeFrameBySubjectId", {
-          headers: { Authorization: userToken() },
-          params: { subjectId: id },
-        })
-        .then((response) => {
-          this.treeData = dealSelect(response.data);
-        });
+          .get("/knowledgeFrame/loadKnowledgeFrameBySubjectId", {
+            headers: { Authorization: userToken() },
+            params: { subjectId: id },
+          })
+          .then((response) => {
+            this.treeData = dealSelect(response.data);
+          });
     },
 
     // 新建
     addNewParent() {
+      const nextChapter = this.getNextChapter();
       this.treeData.push({
         chapterId: this.newChapterId++,
         chapterParentId: 0,
-        label: "第" + this.getNextChapter() + "章 未填写节点信息",
+        label: "第" + nextChapter + "章 未填写节点信息",
         isKnowledge: false,
         children: [],
       });
@@ -216,18 +220,18 @@ export default {
         }
       } else {
         isKnowledgeChildren =
-          data.children[data.children.length - 1].isKnowledge;
+            data.children[data.children.length - 1].isKnowledge;
         if (isKnowledgeChildren) {
           order = "";
         } else {
           let label =
-            data.children[data.children.length - 1].label.split(" ")[0];
+              data.children[data.children.length - 1].label.split(" ")[0];
           let section = label.split("-");
           let num = section[section.length - 1];
           order +=
-            label.slice(0, label.length - num.length) +
-            (parseInt(num) + 1) +
-            " ";
+              label.slice(0, label.length - num.length) +
+              (parseInt(num) + 1) +
+              " ";
         }
       }
       const newChild = {
@@ -261,7 +265,7 @@ export default {
               //   );
               // } else {
               elem.label =
-                this.chapterForm.chapterName + " " + this.chapterForm.content;
+                  this.chapterForm.chapterName + " " + this.chapterForm.content;
               // elem.isKnowledge = this.chapterForm.isKnowledge;
               // }
             }
@@ -285,29 +289,29 @@ export default {
         cancelButtonText: "取消",
         type: "warning",
       })
-        .then(() => {
-          children.splice(index, 1);
-          if (!data.isKnowledge && index < children.length) {
-            // x-x且非队尾元素 -> 需要调整章节顺序
-            for (let i = index; i < children.length; i++) {
-              let label = children[i].label.split(" ");
-              let name = label[0].split("-");
-              children[i].label =
-                name[0] + "-" + (parseInt(name[1]) - 1) + " " + label[1];
+          .then(() => {
+            children.splice(index, 1);
+            if (!data.isKnowledge && index < children.length) {
+              // x-x且非队尾元素 -> 需要调整章节顺序
+              for (let i = index; i < children.length; i++) {
+                let label = children[i].label.split(" ");
+                let name = label[0].split("-");
+                children[i].label =
+                    name[0] + "-" + (parseInt(name[1]) - 1) + " " + label[1];
+              }
             }
-          }
-          this.nextChapter = this.getNextChapter();
-        })
-        .catch(() => {
-          this.$message.info("已取消删除");
-        });
+            this.nextChapter = this.getNextChapter();
+          })
+          .catch(() => {
+            this.$message.info("已取消删除");
+          });
     },
 
     save(treeList) {
       let list = [];
       treeList.forEach((item) => {
         list.push(
-          item.chapterId +
+            item.chapterId +
             "," +
             item.chapterParentId +
             "," +
@@ -319,32 +323,32 @@ export default {
         );
       });
       this.$axios
-        .post(
-          "/knowledgeFrame/save",
-          this.$qs.stringify(
-            {
-              knowledgeFrames: list,
-              subjectId: this.subjectForm.subjectId,
-            },
-            { indices: false }
-          ),
-          {
-            headers: { Authorization: userToken() },
-          }
-        )
-        .then((response) => {
-          this.$message({
-            type: response.data.success ? "success" : "error",
-            message: response.data.message,
+          .post(
+              "/knowledgeFrame/save",
+              this.$qs.stringify(
+                  {
+                    knowledgeFrames: list,
+                    subjectId: this.subjectForm.subjectId,
+                  },
+                  { indices: false }
+              ),
+              {
+                headers: { Authorization: userToken() },
+              }
+          )
+          .then((response) => {
+            this.$message({
+              type: response.data.success ? "success" : "error",
+              message: response.data.message,
+            });
+            if (response.data.success) {
+              this.$router.push("/teacher/subjectInfo");
+            }
+          })
+          .catch(function (error) {
+            this.$message.info("数据出错");
+            console.log(error);
           });
-          if (response.data.success) {
-            this.$router.push("/teacher/subjectInfo");
-          }
-        })
-        .catch(function (error) {
-          this.$message.info("数据出错");
-          console.log(error);
-        });
     },
   },
 };
