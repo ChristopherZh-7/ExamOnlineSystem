@@ -272,7 +272,7 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="pageno"
-          :page-sizes="[5, 10, 20, 50]"
+          :page-sizes="[50, 100, 200, 500]"
           :page-size="size"
           layout="total, sizes, ->, pager, next, jumper"
           :total="totalItems"
@@ -335,7 +335,7 @@ export default {
       search: "",
       tableData: [],
       pageno: 1,
-      size: 10,
+      size: 100, // 将默认值从10改为100
       totalItems: 0,
       cascaderProps: {
         value: 'value',

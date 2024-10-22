@@ -164,7 +164,9 @@ export default {
     clearFormFields() {
       this.chapterForm = {};
       this.$nextTick(() => {
-        this.$refs.chapterForm.clearValidate();
+        if (this.$refs.chapterForm) {
+          this.$refs.chapterForm.clearValidate();
+        }
       });
     },
 
