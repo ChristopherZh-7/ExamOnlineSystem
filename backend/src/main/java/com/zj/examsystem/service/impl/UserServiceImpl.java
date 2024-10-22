@@ -215,17 +215,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         result.put("complete", complete);
 
         List<Float> correctList = testHistoryMapper.findCorrectnessByStudentId(userId);
-        // average correctness
-        Float sum = 0.0f;
-        for (Float f : correctList) {
-            sum += f;
+
+        // 检查 correctList 是否为空
+        if (correctList.isEmpty()) {
+            result.put("average", 0.0f);
+            result.put("max", 0.0f);
+        } else {
+            // average correctness
+            Float sum = 0.0f;
+            for (Float f : correctList) {
+                sum += f;
+            }
+            float average = sum / correctList.size();
+            result.put("average", average);
+
+            // max correctness
+            result.put("max", Collections.max(correctList));
         }
-        result.put("average", sum / correctList.size());
-
-        // max correctness
-        result.put("max", correctList.get(0));
-
-        // test history: []
 
         return result;
     }
