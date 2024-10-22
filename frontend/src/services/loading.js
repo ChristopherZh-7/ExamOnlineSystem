@@ -25,7 +25,7 @@ function showLoading(target) {
 }
 
 function hideLoading() {
-  needLoadingRequestCount = Math.max(--needLoadingRequestCount, 0) //做个保护
+  needLoadingRequestCount = Math.max(--needLoadingRequestCount, 0) // 做个保护
   if (needLoadingRequestCount === 0) {
     toHideLoading()
   }
@@ -33,8 +33,10 @@ function hideLoading() {
 
 // 防抖：将 300ms 间隔内的关闭 loading 便合并为一次
 var toHideLoading = _.debounce(() => {
-  loading.close()
-  loading = null
+  if (loading) {
+    loading.close()
+    loading = null
+  }
 }, 300)
 
 http.interceptors.request.use(
@@ -64,12 +66,23 @@ http.interceptors.response.use(
     if (error.config.headers.showLoading !== false) {
       hideLoading()
     }
-    if (error.response && error.response.data && error.response.data.message) {
-      var jsonObj = JSON.parse(error.response.data.message)
-      ElMessage.error(jsonObj.message)
-    } else {
-      ElMessage.error(error.message)
+    let errorMessage = '发生未知错误'
+    if (error.response && error.response.data) {
+      try {
+        if (typeof error.response.data === 'string') {
+          const jsonObj = JSON.parse(error.response.data)
+          errorMessage = jsonObj.message || '服务器返回了错误'
+        } else if (typeof error.response.data === 'object') {
+          errorMessage = error.response.data.message || '服务器返回了错误'
+        }
+      } catch (e) {
+        console.error('解析错误响应失败:', e)
+        errorMessage = error.response.data || '服务器返回了无效的错误信息'
+      }
+    } else if (error.message) {
+      errorMessage = error.message
     }
+    ElMessage.error(errorMessage)
     return Promise.reject(error)
   },
 )

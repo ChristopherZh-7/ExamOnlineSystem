@@ -36,7 +36,7 @@
       <el-card
         shadow="hover"
         style="margin-bottom: 10px"
-        v-for="(type, index) in testForm.questionList"
+        v-for="(type, index) in filteredQuestionList"
         :key="index"
       >
         <template #header>
@@ -57,22 +57,8 @@
                 circle
                 size="large"
                 :class="{
-                  'index-btn-border':
-                    sequence ==
-                    j +
-                      1 +
-                      i * CARD_COL_NUMBER +
-                      (0 +
-                        (index > 0 ? testForm.questionList[0].length : 0) +
-                        (index > 1 ? testForm.questionList[1].length : 0)),
-                  'index-btn-style':
-                    reply[
-                      j +
-                        i * CARD_COL_NUMBER +
-                        (0 +
-                          (index > 0 ? testForm.questionList[0].length : 0) +
-                          (index > 1 ? testForm.questionList[1].length : 0))
-                    ] != undefined,
+                  'index-btn-border': isCurrentQuestion(index, i, j),
+                  'index-btn-style': isAnswered(index, i, j),
                 }"
                 style="
                   cursor: auto;
@@ -80,25 +66,9 @@
                   font-weight: bold;
                   font-size: 16px;
                 "
-                @click="
-                  jumpTo(
-                    j +
-                      1 +
-                      i * CARD_COL_NUMBER +
-                      (0 +
-                        (index > 0 ? testForm.questionList[0].length : 0) +
-                        (index > 1 ? testForm.questionList[1].length : 0))
-                  )
-                "
+                @click="jumpToQuestion(index, i, j)"
               >
-                {{
-                  j +
-                  1 +
-                  i * CARD_COL_NUMBER +
-                  (0 +
-                    (index > 0 ? testForm.questionList[0].length : 0) +
-                    (index > 1 ? testForm.questionList[1].length : 0))
-                }}
+                {{ getQuestionNumber(index, i, j) }}
               </el-button>
             </div>
           </el-col>
@@ -126,68 +96,49 @@
       </div>
       <div style="padding: 0px 20px" v-if="testPaperFlag">
         <choice-question
-          :key="questionRefreshKey"
-          v-if="
-            sequence > 0 && sequence <= testForm.questionList[CHOICE_NO].length
-          "
+          v-if="currentQuestion && currentQuestion.typeId === 1"
+          :key="`choice-${questionRefreshKey}-${sequence}`"
           :number="sequence"
-          :title="
-            testForm.questionList[CHOICE_NO].list[
-              questionRowCol[CHOICE_NO * 2]
-            ][questionRowCol[CHOICE_NO * 2 + 1]].questionTitle
-          "
-          :answers="
-            testForm.questionList[CHOICE_NO].list[
-              questionRowCol[CHOICE_NO * 2]
-            ][questionRowCol[CHOICE_NO * 2 + 1]].answer
-          "
+          :title="currentQuestion.questionTitle"
+          :answers="currentQuestion.answer"
           :choose="reply[sequence - 1]"
           @returnAnswer="getReply"
         ></choice-question>
         <judge-question
-          :key="questionRefreshKey"
-          v-if="
-            sequence > testForm.questionList[CHOICE_NO].length &&
-            sequence <=
-              testForm.questionList[CHOICE_NO].length +
-                testForm.questionList[JUDGE_NO].length
-          "
+          v-else-if="currentQuestion && currentQuestion.typeId === 2"
+          :key="`judge-${questionRefreshKey}`"
           :number="sequence"
-          :questionId="
-            testForm.questionList[JUDGE_NO].list[questionRowCol[JUDGE_NO * 2]][
-              questionRowCol[JUDGE_NO * 2 + 1]
-            ].questionId
-          "
-          :title="
-            testForm.questionList[JUDGE_NO].list[questionRowCol[JUDGE_NO * 2]][
-              questionRowCol[JUDGE_NO * 2 + 1]
-            ].questionTitle
-          "
+          :questionId="currentQuestion.questionId"
+          :title="currentQuestion.questionTitle"
           :choose="reply[sequence - 1]"
           @returnAnswer="getReply"
         ></judge-question>
         <short-answer-question
-          :key="questionRefreshKey"
-          v-if="
-            sequence >
-              testForm.questionList[CHOICE_NO].length +
-                testForm.questionList[JUDGE_NO].length &&
-            sequence <= testForm.questionTotal
-          "
+          v-else-if="currentQuestion && currentQuestion.typeId === 3"
+          :key="`short-answer-${questionRefreshKey}`"
           :number="sequence"
-          :questionId="
-            testForm.questionList[SHORT_ANSWER_NO].list[
-              questionRowCol[SHORT_ANSWER_NO * 2]
-            ][questionRowCol[SHORT_ANSWER_NO * 2 + 1]].questionId
-          "
-          :title="
-            testForm.questionList[SHORT_ANSWER_NO].list[
-              questionRowCol[SHORT_ANSWER_NO * 2]
-            ][questionRowCol[SHORT_ANSWER_NO * 2 + 1]].questionTitle
-          "
+          :questionId="currentQuestion.questionId"
+          :title="currentQuestion.questionTitle"
           :content="reply[sequence - 1]"
           @returnAnswer="getReply"
         ></short-answer-question>
+        <submit-flag-question
+          v-else-if="currentQuestion && currentQuestion.typeId === 4"
+          :key="`submit-flag-${questionRefreshKey}`"
+          :number="sequence"
+          :questionId="currentQuestion.questionId"
+          :title="currentQuestion.questionTitle"
+          :content="reply[sequence - 1]"
+          @returnAnswer="getReply"
+        ></submit-flag-question>
+        <code-audit-question
+          v-else-if="currentQuestion && currentQuestion.typeId === 5"
+          :key="`code-audit-${questionRefreshKey}`"
+          :number="sequence"
+          :questionId="currentQuestion.questionId"
+          :title="currentQuestion.questionTitle"
+          @returnAnswer="getReply"
+        ></code-audit-question>
       </div>
       <div class="operation">
         <ul class="end">
@@ -211,6 +162,8 @@
           </li>
         </ul>
       </div>
+      <!-- 添加调试信息显示 -->
+      <div>{{ debugInfo }}</div>
     </el-main>
   </el-container>
 </template>
@@ -222,6 +175,8 @@ import countDown from "@/components/CountDown.vue";
 import choiceQuestion from "@/components/ChoiceQuestion.vue";
 import judgeQuestion from "@/components/JudgeQuestion.vue";
 import shortAnswerQuestion from "@/components/ShortAnswerQuestion.vue";
+import submitFlagQuestion from "@/components/SubmitFlagQuestion.vue";
+import codeAuditQuestion from "@/components/CodeAuditQuestion.vue";
 import moment from "moment";
 export default {
   components: {
@@ -229,6 +184,8 @@ export default {
     choiceQuestion,
     judgeQuestion,
     shortAnswerQuestion,
+    submitFlagQuestion,
+    codeAuditQuestion,
   },
   data() {
     return {
@@ -237,8 +194,10 @@ export default {
       CHOICE_NO: 0, // index = typeId - 1
       JUDGE_NO: 1,
       SHORT_ANSWER_NO: 2,
+      SUBMIT_FLAG_NO: 3, // 新增：提交flag题
+      CODE_AUDIT_NO: 4,  // 新增：代码审计题
 
-      // 解决axios获取数据的异步问题
+      // 解决axios获取数的异步问题
       testInfoFlag: false,
       testPaperFlag: false,
 
@@ -254,13 +213,16 @@ export default {
         testId: "",
         testName: "",
         questionTotal: 0,
-        questionList: [],
+        questionList: [], // 确保这里初始化为空数组
       },
 
       sequence: 1, // 全局
       questionRowCol: [0, 0, 0, 0, 0, 0],
       questionRefreshKey: 0, // 给自定义component加上key -> 刷新component
       reply: [],
+      currentQuestion: null,
+      allQuestions: [],
+      debugInfo: '', // 添加这行用于调试
     };
   },
   created() {
@@ -270,13 +232,17 @@ export default {
   },
   methods: {
     loadData() {
+      console.log('开始加载数据');
       this.loadTestInfo().then((response) => {
+        console.log('测试信息加载完成', this.testForm);
         this.testInfoFlag = true;
         this.countDownKey = new Date();
         this.timekeep = true;
       });
       this.loadTestPaper().then((response) => {
+        console.log('试卷加载完成', this.allQuestions);
         this.testPaperFlag = true;
+        this.updateCurrentQuestion();
       });
     },
     loadTestInfo() {
@@ -301,81 +267,63 @@ export default {
         })
         .then((response) => {
           let res = dealSelect(response.data);
-          if (res) {
+          if (res && Array.isArray(res)) {
+            this.allQuestions = res;
             this.testForm.questionTotal = res.length;
+            this.updateCurrentQuestion();
             this.testForm.questionList = [
-              {
-                name: "选择题",
-                length: 0,
-                list: [],
-              },
-              {
-                name: "判断题",
-                length: 0,
-                list: [],
-              },
-              {
-                name: "简答题",
-                length: 0,
-                list: [],
-              },
+              { name: "选择题", length: 0, list: [] },
+              { name: "判断题", length: 0, list: [] },
+              { name: "简答题", length: 0, list: [] },
+              { name: "提交flag题", length: 0, list: [] },
+              { name: "代码审计题", length: 0, list: [] },
             ];
-            let quesList = [[], [], []];
-            let quesNum = [0, 0, 0];
+            let quesList = [[], [], [], [], []]; // 扩展到5个数组
+            let quesNum = [0, 0, 0, 0, 0]; // 扩展到5个计数器
+
             res.forEach((item, index) => {
-              quesList[item.typeId - 1].push(item);
-              quesNum[item.typeId - 1]++;
-              if (quesNum[item.typeId - 1] % this.CARD_COL_NUMBER == 0) {
-                this.testForm.questionList[item.typeId - 1].list.push(
-                  quesList[item.typeId - 1]
-                );
-                quesList[item.typeId - 1] = [];
+              if (item.typeId >= 1 && item.typeId <= 5) {
+                quesList[item.typeId - 1].push(item);
+                quesNum[item.typeId - 1]++;
+                if (quesNum[item.typeId - 1] % this.CARD_COL_NUMBER == 0) {
+                  this.testForm.questionList[item.typeId - 1].list.push(
+                    quesList[item.typeId - 1]
+                  );
+                  quesList[item.typeId - 1] = [];
+                }
+              } else {
+                console.error('Invalid typeId:', item.typeId);
               }
+
               if (index + 1 == this.testForm.questionTotal) {
                 for (let i = 0; i < this.testForm.questionList.length; i++) {
-                  this.testForm.questionList[i].list.push(quesList[i]);
+                  if (quesList[i].length > 0) {
+                    this.testForm.questionList[i].list.push(quesList[i]);
+                  }
                   this.testForm.questionList[i].length = quesNum[i];
                 }
               }
             });
+          } else {
+            console.error('Invalid or empty response data');
+            this.testForm.questionList = []; // 确保在错误情况下也设置为空数组
           }
+        })
+        .catch(error => {
+          console.error('Error loading test paper:', error);
+          this.testForm.questionList = []; // 确保在错误情况下也设置为空数组
         });
     },
 
     jumpTo(i) {
-      this.sequence = i;
-      if (i > 0 && i <= this.testForm.questionList[this.CHOICE_NO].length) {
-        let order = this.sequence;
-        this.questionRowCol[this.CHOICE_NO * 2] = Math.floor(
-          (order - 1) / this.CARD_COL_NUMBER
-        );
-        this.questionRowCol[this.CHOICE_NO * 2 + 1] =
-          (order - 1) % this.CARD_COL_NUMBER;
-      } else if (
-        i <=
-        this.testForm.questionList[this.CHOICE_NO].length +
-          this.testForm.questionList[this.JUDGE_NO].length
-      ) {
-        let order =
-          this.sequence - this.testForm.questionList[this.CHOICE_NO].length;
-        this.questionRowCol[this.JUDGE_NO * 2] = Math.floor(
-          (order - 1) / this.CARD_COL_NUMBER
-        );
-        this.questionRowCol[this.JUDGE_NO * 2 + 1] =
-          (order - 1) % this.CARD_COL_NUMBER;
-      } else if (i <= this.testForm.questionTotal) {
-        let order =
-          this.sequence -
-          (this.testForm.questionTotal -
-            this.testForm.questionList[this.SHORT_ANSWER_NO].length);
-        this.questionRowCol[this.SHORT_ANSWER_NO * 2] = Math.floor(
-          (order - 1) / this.CARD_COL_NUMBER
-        );
-        this.questionRowCol[this.SHORT_ANSWER_NO * 2 + 1] =
-          (order - 1) % this.CARD_COL_NUMBER;
-      } else {
-        console.log("function jumpTo(i):something error, please check out!");
+      console.log('跳转到题目', i);
+      if (i < 1) {
+        i = 1;
+      } else if (i > this.testForm.questionTotal) {
+        i = this.testForm.questionTotal;
       }
+      this.sequence = i;
+      this.updateCurrentQuestion();
       this.questionRefreshKey = new Date();
     },
     getReply(data) {
@@ -448,6 +396,37 @@ export default {
           }
         });
     },
+    updateCurrentQuestion() {
+      this.currentQuestion = this.allQuestions[this.sequence - 1];
+    },
+    isCurrentQuestion(typeIndex, rowIndex, colIndex) {
+      return this.sequence === this.getQuestionNumber(typeIndex, rowIndex, colIndex);
+    },
+
+    isAnswered(typeIndex, rowIndex, colIndex) {
+      const questionNumber = this.getQuestionNumber(typeIndex, rowIndex, colIndex) - 1;
+      return this.reply[questionNumber] !== undefined;
+    },
+
+    getQuestionNumber(typeIndex, rowIndex, colIndex) {
+      let number = 1;
+      for (let i = 0; i < typeIndex; i++) {
+        number += this.testForm.questionList[i].length;
+      }
+      number += rowIndex * this.CARD_COL_NUMBER + colIndex;
+      return number;
+    },
+
+    jumpToQuestion(typeIndex, rowIndex, colIndex) {
+      const questionNumber = this.getQuestionNumber(typeIndex, rowIndex, colIndex);
+      this.jumpTo(questionNumber);
+    },
+  },
+  computed: {
+    filteredQuestionList() {
+      // 添加防护检查
+      return (this.testForm.questionList || []).filter(type => type && type.length > 0);
+    }
   },
 };
 </script>
@@ -492,3 +471,4 @@ export default {
   align-items: center;
 }
 </style>
+
